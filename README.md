@@ -1,5 +1,7 @@
 # difr-mid: randomized-depth multi-checkpoint Activation-DiFR
 
+Work done during the Hardware Assurance Program (Aug 17-22 2026)
+
 [Activation-DiFR](https://arxiv.org/abs/2511.20621) (Karvonen et al.) verifies
 a provider's forward pass by comparing JL-projected fingerprints of hidden
 states against a recomputation. Detection is strong (AUC > 0.999 for 4-bit
