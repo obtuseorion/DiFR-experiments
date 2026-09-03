@@ -1,0 +1,57 @@
+{
+  "config": {
+    "declared": "meta-llama/Llama-3.1-8B-Instruct",
+    "cheap": "unsloth/Llama-3.2-1B-Instruct",
+    "seed": 42,
+    "tokens": 200,
+    "n_prompts": 256,
+    "temperature": 1.0,
+    "top_k": 50,
+    "top_p": 0.95
+  },
+  "n_tokens": 51200,
+  "n_prompts": 256,
+  "gold_filtered_frac": 0.05728515625,
+  "auc_by_tau": {
+    "0.05": {
+      "tau": 0.05,
+      "pos_rate": 0.2383984375,
+      "auc_P0_entropy": 0.8028610297689612,
+      "auc_P1_logistic": 0.8012537053675871,
+      "auc_P2_gbt": 0.8056991073730346
+    },
+    "0.14": {
+      "tau": 0.14,
+      "pos_rate": 0.22927734375,
+      "auc_P0_entropy": 0.8030252478320119,
+      "auc_P1_logistic": 0.8015283419206584,
+      "auc_P2_gbt": 0.805770009539215
+    },
+    "0.3": {
+      "tau": 0.3,
+      "pos_rate": 0.2143359375,
+      "auc_P0_entropy": 0.8006730263318236,
+      "auc_P1_logistic": 0.799363834060101,
+      "auc_P2_gbt": 0.8029335133701883
+    },
+    "0.5": {
+      "tau": 0.5,
+      "pos_rate": 0.1951171875,
+      "auc_P0_entropy": 0.7999165432446003,
+      "auc_P1_logistic": 0.7989278158179802,
+      "auc_P2_gbt": 0.8032937527811072
+    }
+  },
+  "tau_batch": 0.002901395721435544,
+  "tau_batch_source": "honest run results/entropy_divergence_honest.json",
+  "r_min_pass": 0.8200000000000001,
+  "break_even_r_optimistic": 0.845,
+  "break_even_r_honest": 0.0338,
+  "c_ratio_assumed": 0.155,
+  "prefill_advantage": 4.0,
+  "tokens": 200,
+  "c_attack_optimistic": 0.9750000000000001,
+  "c_attack_honest_kv": 20.655,
+  "declared_frac_honest": 20.5,
+  "verdict": "ATTACK VIABLE under optimistic accounting"
+}

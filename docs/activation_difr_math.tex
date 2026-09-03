@@ -1,0 +1,220 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black}
+
+\title{Randomized-Depth Multi-Checkpoint Activation-DiFR:\\ the verifier-compute optimization}
+\author{difr-mid project notes}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Upstream Activation-DiFR verifies a provider's forward pass by comparing
+Johnson--Lindenstrauss fingerprints of the hidden state feeding the unembedding,
+at the cost of one full-depth teacher-forced pass per audited token. We fingerprint
+at multiple depths and audit at a \emph{random} depth, so expected verifier compute
+falls to $\mathbb{E}[d]/L$ of a full pass. Randomization is load-bearing: any fixed
+shallow audit depth is fully exploitable by a suffix cheater, whereas a randomized
+depth catches a cheat in segment $i$ with per-token probability $\Pr_\pi[d\ge c_i]$
+and escape probability decaying geometrically in the number of audited tokens. The
+audit distribution $\pi$ is the knob trading compute against time-to-detection, and
+its optimum has a simple two-point structure.
+\end{abstract}
+
+\section{Setup}
+
+Let $M$ be the declared model with $L$ transformer layers and hidden width $d_{\mathrm{model}}$.
+For a sequence $x_{1:T}$, write $h^{(\ell)}_t \in \mathbb{R}^{d_{\mathrm{model}}}$ for the residual-stream
+state at position $t$ after layer $\ell$ (with $h^{(L)}_t$ taken \emph{post} final
+normalization, i.e.\ the input to $\mathrm{lm\_head}$). By causality,
+\[
+  h^{(\ell)}_t = f_\ell\!\left(x_{1:t}\right)
+\]
+depends only on the prefix, so a single teacher-forced forward pass over $x_{1:T}$ yields
+$\{h^{(\ell)}_t\}_{t\le T,\,\ell\le L}$ in parallel. This is what makes verification cheap
+relative to generation: the provider decoded autoregressively in $T$ sequential steps; the
+verifier replays all of them in one prefill.
+
+\paragraph{Checkpoints.}
+Fix a checkpoint set
+\[
+  \mathcal{C} = \{c_1 < c_2 < \dots < c_m = L\} \subseteq [L],
+\]
+with $c_0 \coloneqq 0$. The layers $(c_{i-1}, c_i]$ form the $i$-th \emph{segment}.
+
+\paragraph{Fingerprints.}
+For each checkpoint $c\in\mathcal{C}$ the verifier publishes a seed $s_c$ that determines a
+Johnson--Lindenstrauss matrix
+\[
+  P_c \in \mathbb{R}^{k\times d_{\mathrm{model}}}, \qquad (P_c)_{ij} \sim \mathcal{N}\!\left(0, \tfrac{1}{k}\right)
+  \ \text{i.i.d.},\qquad k \ll d_{\mathrm{model}} .
+\]
+The prover, during its ordinary forward pass, emits for every generated position $t$ the
+fingerprint vector
+\[
+  \phi_t \;=\; \bigl(P_{c_1} h^{(c_1)}_t,\; \dots,\; P_{c_m} h^{(c_m)}_t\bigr)
+  \;\in\; \mathbb{R}^{m k},
+\]
+i.e.\ $mk$ floats per token of overhead. Let $\tilde h^{(c)}_t$ denote the prover's
+(possibly dishonest) state and $\tilde\phi_{t,c} = P_c \tilde h^{(c)}_t$ the shipped
+fingerprint at checkpoint $c$.
+
+\paragraph{Distance and acceptance.}
+The verifier recomputes $h^{(c)}_t$ teacher-forced and forms
+\[
+  D_{t,c} \;=\; \bigl\| P_c h^{(c)}_t - \tilde\phi_{t,c} \bigr\|_2 .
+\]
+By the JL lemma, $\mathbb{E}\,D_{t,c}^2 = \|h^{(c)}_t - \tilde h^{(c)}_t\|_2^2$, so $D_{t,c}$
+is an unbiased low-dimensional proxy for the true activation discrepancy. Honest
+cross-implementation runs (different kernels, batching, dtypes) are not bit-exact, so for
+each checkpoint a threshold $\tau_c$ is calibrated on honest traffic at a target false-positive
+rate $\alpha$:
+\[
+  \tau_c \;=\; \inf\Bigl\{\tau:\ \Pr_{\text{honest}}\bigl[\bar D_c > \tau\bigr] \le \alpha\Bigr\},
+  \qquad
+  \bar D_c \;=\; \frac{1}{T}\sum_{t=1}^{T} D_{t,c},
+\]
+where the per-sequence mean $\bar D_c$ is used rather than the per-token maximum
+because the latter is too heavy-tailed. A checkpoint \emph{fails} if $\bar D_c > \tau_c$.
+
+\section{Verifier cost}
+
+Let $\kappa_\ell$ be the cost of layer $\ell$ (forward, per token) and
+$K(\ell) = \sum_{j\le \ell}\kappa_j$ the cumulative cost; $K(L)$ is one full pass. Upstream
+Activation-DiFR verifies at depth $L$ only, costing $K(L)$ per audited token. Since
+$h^{(c)}_t$ does not depend on layers $>c$, a verifier that audits to depth $d$ can stop
+after layer $d$ and pay only $K(d)$, while still checking every checkpoint $c\le d$.
+For uniform layers, $K(d)/K(L) = d/L$.
+
+\section{The coverage gap under a fixed audit depth}
+
+Suppose the verifier always audits to a fixed depth $d = c_j < L$. A \emph{suffix cheater}
+computes layers $1,\dots,c_j$ honestly and substitutes arbitrary cheaper computation for
+layers $c_j{+}1,\dots,L$ (quantized suffix, skipped layers, another model's head).
+Then $\tilde h^{(c)}_t = h^{(c)}_t$ for all $c\le c_j$, so every audited fingerprint passes:
+\[
+  \Pr[\text{detect}] = \alpha \quad(\text{the false-positive rate}),
+\]
+while the cheater saves exactly $K(L)-K(c_j)$ per token---the same compute the verifier
+saved. Any fixed shallow depth is therefore fully exploitable.
+
+\section{Randomized audit depth}
+
+Let the verifier draw, independently for each audited token, a depth
+\[
+  d \sim \pi, \qquad \pi \in \Delta(\mathcal{C}),\qquad
+  \pi_i \coloneqq \Pr_\pi[d = c_i],
+\]
+and recompute layers $1..d$, checking all checkpoints $c\le d$. Define the tail probability
+\[
+  \bar\Pi_i \;\coloneqq\; \Pr_\pi[d \ge c_i] \;=\; \sum_{j\ge i}\pi_j .
+\]
+
+\paragraph{Propagation.}
+A cheat that first deviates inside segment $i$ (layers $(c_{i-1},c_i]$) corrupts
+$h^{(c)}_t$ for every $c \ge c_i$, since each later layer is a deterministic function of the
+earlier state (and the corruption does not cancel except on a measure-zero set, which the
+calibrated threshold excludes). Hence it is caught at token $t$ iff $d_t \ge c_i$ and the
+discrepancy exceeds the threshold; writing
+\[
+  p_i \;\coloneqq\; \Pr\bigl[\bar D_{c_i}>\tau_{c_i}\;\big|\;\text{cheat in segment } i\bigr]
+\]
+for the per-audit power (empirically $p_i\approx 1$ for quantization-level cheats),
+\[
+  \Pr[\text{caught at one audited token}] \;=\; \bar\Pi_i\, p_i .
+\]
+
+\paragraph{Escape probability.}
+Over $N$ independently audited tokens,
+\[
+  \Pr[\text{escape}] \;=\; \bigl(1-\bar\Pi_i\,p_i\bigr)^{N}
+  \;\le\; \exp\!\bigl(-N\,\bar\Pi_i\,p_i\bigr),
+\]
+so the expected number of audited tokens to detection is $1/(\bar\Pi_i p_i)$, and
+detection is guaranteed with probability $\ge 1-\delta$ once
+\[
+  N \;\ge\; \frac{\ln(1/\delta)}{-\ln\!\bigl(1-\bar\Pi_i p_i\bigr)}
+  \;\approx\; \frac{\ln(1/\delta)}{\bar\Pi_i\,p_i}.
+\]
+
+\paragraph{Expected verifier compute.}
+\[
+  \mathbb{E}_\pi[K(d)] \;=\; \sum_{i=1}^{m}\pi_i\,K(c_i)
+  \;=\; \sum_{i=1}^{m}\bar\Pi_i\,\bigl(K(c_i)-K(c_{i-1})\bigr),
+\]
+the second form (Abel summation) showing that each segment's cost is paid exactly with
+the probability that the audit reaches it. The relative saving over full-depth auditing is
+$1-\mathbb{E}_\pi[K(d)]/K(L)$.
+
+\section{The optimization}
+
+The audit distribution $\pi$ trades expected compute against time-to-detection. Two
+equivalent formulations:
+
+\paragraph{(a) Minimize compute subject to a detection floor.}
+Require every segment to be caught with per-token probability at least $\rho$:
+\[
+  \min_{\pi\in\Delta(\mathcal{C})}\ \sum_{i=1}^{m}\bar\Pi_i\,\bigl(K(c_i)-K(c_{i-1})\bigr)
+  \quad\text{s.t.}\quad \bar\Pi_i\,p_i \;\ge\; \rho \ \ \forall i .
+\]
+Because $\bar\Pi_i$ is non-increasing in $i$ and the objective weights are positive, the
+binding constraint is the deepest segment: the minimizer sets $\bar\Pi_m = \rho/p_m$
+(audit to full depth with probability $\rho/p_m$) and places the remaining mass as shallow
+as the shallower constraints allow. With uniform $p_i=p$ and uniform layers, the optimum
+puts mass $\rho/p$ on $c_m=L$ and $1-\rho/p$ on $c_1$, giving
+\[
+  \frac{\mathbb{E}_\pi[K(d)]}{K(L)} \;=\; \frac{c_1}{L} + \frac{\rho}{p}\Bigl(1-\frac{c_1}{L}\Bigr),
+\]
+which approaches $c_1/L$ as $\rho\to 0$ while keeping every segment's escape probability
+decaying as $(1-\rho)^N$.
+
+\paragraph{(b) Maximize worst-case detection subject to a compute budget.}
+\[
+  \max_{\pi\in\Delta(\mathcal{C})}\ \min_{i}\ \bar\Pi_i\,p_i
+  \quad\text{s.t.}\quad \sum_{i=1}^{m}\pi_i\,K(c_i) \;\le\; B .
+\]
+This is a linear program in $\pi$; the min is again attained at $i=m$, so it reduces to
+maximizing $\pi_m$ under the budget, with the same two-point structure.
+
+\paragraph{Cheater's economics.}
+A cheater saving $\sigma_i \coloneqq K(L)-K(c_{i-1})$ per token by cheating from segment $i$
+onward, under a penalty $\Lambda$ on detection, profits only if
+\[
+  \sigma_i \cdot N_{\text{served}} \;>\; \Lambda\cdot\Bigl(1-(1-\bar\Pi_i p_i)^{N_{\text{audited}}}\Bigr),
+\]
+and since the right-hand side approaches $\Lambda$ exponentially fast in $N_{\text{audited}}$,
+any $\bar\Pi_i p_i>0$ makes sustained cheating unprofitable for large enough audit volume.
+The design choice is therefore not \emph{whether} to audit deep, but how rarely one can
+afford to.
+
+\section{Summary of the identity}
+\[
+  \underbrace{\text{verifier cost}}_{\sum_i \bar\Pi_i\,\Delta K_i}
+  \quad\text{vs.}\quad
+  \underbrace{\text{per-token catch rate of segment } i}_{\bar\Pi_i\,p_i}
+\]
+share the same tail probabilities $\bar\Pi_i$: every unit of compute spent reaching
+checkpoint $c_i$ buys detection probability for \emph{every} cheat that starts at or before
+it, and a fixed shallow policy is exactly the degenerate point $\bar\Pi_m = 0$.
+
+\section*{Notes on simplifications}
+\begin{itemize}
+  \item $p_i\approx 1$ matches the empirical results in this repo (fp8-KV and int4-suffix
+        cheats flagged 100\% once the audit reaches the corrupted checkpoint); keeping
+        $p_i$ explicit lets a measured ROC operating point be substituted.
+  \item The two-point optimum (mass on the shallowest and deepest checkpoints) is what the
+        LP gives under uniform $p_i$. Intermediate checkpoints carry mass only under
+        heterogeneous $p_i$, a cheater restricted to certain segments, or a per-sequence
+        rather than per-token depth draw.
+  \item ``Corruption propagates and does not cancel'' is an assumption justified by the
+        calibrated threshold: a cheater cannot land inside the noise floor at a later
+        checkpoint without knowing the true state there, which requires doing the honest
+        work up to that point.
+\end{itemize}
+
+\end{document}

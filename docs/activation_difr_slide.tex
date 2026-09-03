@@ -1,0 +1,63 @@
+\documentclass[10pt]{extarticle}
+% 16:9 slide-shaped page, Times text + math to match the ICML paper style
+\usepackage[paperwidth=17.6cm,paperheight=8.0cm,margin=0.55cm]{geometry}
+\usepackage{newtxtext,newtxmath}
+\usepackage{mathtools}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\pagestyle{empty}
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\setlength{\floatsep}{0pt}
+\setlength{\textfloatsep}{0pt}
+\setlength{\intextsep}{0pt}
+\setlength{\abovedisplayskip}{4pt}
+\setlength{\belowdisplayskip}{4pt}
+
+\begin{document}
+\setcounter{algorithm}{1}
+\noindent
+\begin{minipage}[t]{0.48\textwidth}
+\vspace{0pt}
+\begin{algorithm}[H]
+\caption{Multi-Checkpoint Fingerprint Collection}
+\begin{algorithmic}[1]
+\REQUIRE context $c$, token $t$, model $\theta$, checkpoints $\mathcal{C}=\{c_1<\dots<c_m=L\}$, projection dim $k\ll D$, projection seed $\sigma'$
+\STATE $a^{(1)},\dots,a^{(L)} \leftarrow \mathrm{ForwardPass}(\theta,c,t)$
+\FOR{$c_i \in \mathcal{C}$}
+  \STATE $f_i \leftarrow P_{\sigma'+c_i}\, a^{(c_i)}$
+\ENDFOR
+\RETURN $f = (f_1,\dots,f_m) \in \mathbb{R}^{mk}$
+\end{algorithmic}
+\end{algorithm}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}
+\vspace{0pt}
+\begin{algorithm}[H]
+\caption{Randomized-Depth Fingerprint Matching}
+\begin{algorithmic}[1]
+\REQUIRE context $c$, token $t$, model $\theta$, checkpoints $\mathcal{C}$, projection dim $k$, seed $\sigma'$, audit distribution $\pi$ over $\mathcal{C}$, reference fingerprints $f\in\mathbb{R}^{mk}$
+\STATE $d \sim \pi$
+\STATE $\hat a^{(1)},\dots,\hat a^{(d)} \leftarrow \mathrm{PartialForwardPass}(\theta,c,t,d)$
+\FOR{$c_i \in \mathcal{C}$ with $c_i \le d$}
+  \STATE $\hat f_i \leftarrow P_{\sigma'+c_i}\, \hat a^{(c_i)}$
+  \STATE $d_i \leftarrow \|f_i - \hat f_i\|_2$
+\ENDFOR
+\RETURN $\{d_i : c_i \le d\}$
+\end{algorithmic}
+\end{algorithm}
+\end{minipage}
+
+\vspace{0.8em}
+\noindent
+\begin{minipage}[t]{0.48\textwidth}
+\[
+  \mathbb{E}_\pi[\text{verifier cost}] = \textstyle\sum_i \pi_i\,K(c_i) \;\ll\; K(L)
+\]
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}
+\[
+  \bar\Pi_i\coloneqq\Pr_\pi[d\ge c_i],\qquad
+  \Pr[\text{escape}] = (1-\bar\Pi_i)^{N}
+\]
+\end{minipage}
+\end{document}

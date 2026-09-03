@@ -1,0 +1,19 @@
+# Append to ~/.ssh/config on your LOCAL machine.
+# Edit HostName/User/IdentityFile for your instance; if the IP changes each
+# spin-up, this is the only line you touch.
+
+Host gpu
+    HostName 203.0.113.42          # <-- instance IP (changes per spin-up)
+    User ubuntu                    # <-- instance user
+    IdentityFile ~/.ssh/id_ed25519 # <-- your key
+    # Connection multiplexing: first ssh opens a master connection, every
+    # subsequent call (Claude makes many) reuses it instantly - no
+    # re-handshake, no re-auth. Master persists 10 min after last use.
+    ControlMaster auto
+    ControlPath ~/.ssh/cm-%r@%h:%p
+    ControlPersist 10m
+    # Survive brief network blips instead of hanging Claude's commands
+    ServerAliveInterval 30
+    ServerAliveCountMax 4
+    # Fail fast if the box is down rather than stalling for 2 minutes
+    ConnectTimeout 10

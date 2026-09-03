@@ -1,0 +1,532 @@
+{
+  "runs": {
+    "256": {
+      "config": {
+        "model": "Qwen/Qwen3-1.7B",
+        "n_layers": 28,
+        "d_model": 2048,
+        "checkpoints": [
+          7,
+          14,
+          21,
+          28
+        ],
+        "fp_k": 32,
+        "max_tokens": 48,
+        "n_prompts": 600,
+        "n_train": 420,
+        "n_test": 180,
+        "train_frac": 0.7,
+        "cheat_levels": 256,
+        "target_fpr": 0.01,
+        "n_reseed_epochs": 8,
+        "normalize": true,
+        "shortcut_j": 7
+      },
+      "results": {
+        "fixed": {
+          "F0-mean": {
+            "7": {
+              "pass_rate": 0.0,
+              "cost": 0.0,
+              "n_checkpoints": 1
+            },
+            "14": {
+              "pass_rate": 0.0,
+              "cost": 0.0,
+              "n_checkpoints": 2
+            },
+            "21": {
+              "pass_rate": 0.0,
+              "cost": 0.0,
+              "n_checkpoints": 3
+            },
+            "28": {
+              "pass_rate": 0.0,
+              "cost": 0.0,
+              "n_checkpoints": 4
+            }
+          },
+          "F0-copy": {
+            "7": {
+              "pass_rate": 0.0,
+              "cost": 0.0,
+              "n_checkpoints": 1
+            },
+            "14": {
+              "pass_rate": 0.0,
+              "cost": 0.0,
+              "n_checkpoints": 2
+            },
+            "21": {
+              "pass_rate": 0.0,
+              "cost": 0.0,
+              "n_checkpoints": 3
+            },
+            "28": {
+              "pass_rate": 0.0,
+              "cost": 0.0,
+              "n_checkpoints": 4
+            }
+          },
+          "F1-ridge": {
+            "7": {
+              "pass_rate": 0.008101851679384708,
+              "cost": 0.0,
+              "n_checkpoints": 1
+            },
+            "14": {
+              "pass_rate": 0.004745370242744684,
+              "cost": 0.0,
+              "n_checkpoints": 2
+            },
+            "21": {
+              "pass_rate": 0.0009259259095415473,
+              "cost": 0.0,
+              "n_checkpoints": 3
+            },
+            "28": {
+              "pass_rate": 0.00034722223062999547,
+              "cost": 0.0,
+              "n_checkpoints": 4
+            }
+          },
+          "F2-mlp64": {
+            "7": {
+              "pass_rate": 0.0,
+              "cost": 0.0,
+              "n_checkpoints": 1
+            },
+            "14": {
+              "pass_rate": 0.0,
+              "cost": 0.0,
+              "n_checkpoints": 2
+            },
+            "21": {
+              "pass_rate": 0.0,
+              "cost": 0.0,
+              "n_checkpoints": 3
+            },
+            "28": {
+              "pass_rate": 0.0,
+              "cost": 0.0,
+              "n_checkpoints": 4
+            }
+          },
+          "F2-mlp512": {
+            "7": {
+              "pass_rate": 0.0,
+              "cost": 0.0,
+              "n_checkpoints": 1
+            },
+            "14": {
+              "pass_rate": 0.0,
+              "cost": 0.0,
+              "n_checkpoints": 2
+            },
+            "21": {
+              "pass_rate": 0.0,
+              "cost": 0.0,
+              "n_checkpoints": 3
+            },
+            "28": {
+              "pass_rate": 0.0,
+              "cost": 0.0,
+              "n_checkpoints": 4
+            }
+          },
+          "F3-shortcut": {
+            "7": {
+              "pass_rate": 1.0,
+              "cost": 0.25,
+              "n_checkpoints": 1
+            },
+            "14": {
+              "pass_rate": 0.0,
+              "cost": 0.25,
+              "n_checkpoints": 2
+            },
+            "21": {
+              "pass_rate": 0.0,
+              "cost": 0.25,
+              "n_checkpoints": 3
+            },
+            "28": {
+              "pass_rate": 0.0,
+              "cost": 0.25,
+              "n_checkpoints": 4
+            }
+          },
+          "F3-distill1b@7": {
+            "7": {
+              "pass_rate": 1.0,
+              "cost": 0.2857142857142857,
+              "n_checkpoints": 1
+            },
+            "14": {
+              "pass_rate": 0.0,
+              "cost": 0.2857142857142857,
+              "n_checkpoints": 2
+            },
+            "21": {
+              "pass_rate": 0.0,
+              "cost": 0.2857142857142857,
+              "n_checkpoints": 3
+            },
+            "28": {
+              "pass_rate": 0.0,
+              "cost": 0.2857142857142857,
+              "n_checkpoints": 4
+            }
+          },
+          "F3-distill3b@7": {
+            "7": {
+              "pass_rate": 1.0,
+              "cost": 0.35714285714285715,
+              "n_checkpoints": 1
+            },
+            "14": {
+              "pass_rate": 0.0,
+              "cost": 0.35714285714285715,
+              "n_checkpoints": 2
+            },
+            "21": {
+              "pass_rate": 0.0,
+              "cost": 0.35714285714285715,
+              "n_checkpoints": 3
+            },
+            "28": {
+              "pass_rate": 0.0,
+              "cost": 0.35714285714285715,
+              "n_checkpoints": 4
+            }
+          },
+          "F4-projaware": {
+            "7": {
+              "pass_rate": 0.0,
+              "cost": 0.0,
+              "n_checkpoints": 1
+            },
+            "14": {
+              "pass_rate": 0.0,
+              "cost": 0.0,
+              "n_checkpoints": 2
+            },
+            "21": {
+              "pass_rate": 0.0,
+              "cost": 0.0,
+              "n_checkpoints": 3
+            },
+            "28": {
+              "pass_rate": 0.0,
+              "cost": 0.0,
+              "n_checkpoints": 4
+            }
+          },
+          "F4-oracle": {
+            "7": {
+              "pass_rate": 0.0,
+              "cost": 0.25,
+              "n_checkpoints": 1
+            },
+            "14": {
+              "pass_rate": 0.0,
+              "cost": 0.25,
+              "n_checkpoints": 2
+            },
+            "21": {
+              "pass_rate": 0.0,
+              "cost": 0.25,
+              "n_checkpoints": 3
+            },
+            "28": {
+              "pass_rate": 0.0,
+              "cost": 0.25,
+              "n_checkpoints": 4
+            }
+          }
+        },
+        "reseeded": {
+          "F0-mean": {
+            "7": {
+              "pass_rate": 0.0,
+              "cost": 0.0,
+              "n_checkpoints": 1
+            },
+            "14": {
+              "pass_rate": 0.0,
+              "cost": 0.0,
+              "n_checkpoints": 2
+            },
+            "21": {
+              "pass_rate": 0.0,
+              "cost": 0.0,
+              "n_checkpoints": 3
+            },
+            "28": {
+              "pass_rate": 0.0,
+              "cost": 0.0,
+              "n_checkpoints": 4
+            }
+          },
+          "F0-copy": {
+            "7": {
+              "pass_rate": 0.0001880787021946162,
+              "cost": 0.0,
+              "n_checkpoints": 1
+            },
+            "14": {
+              "pass_rate": 4.340277700976003e-05,
+              "cost": 0.0,
+              "n_checkpoints": 2
+            },
+            "21": {
+              "pass_rate": 0.0,
+              "cost": 0.0,
+              "n_checkpoints": 3
+            },
+            "28": {
+              "pass_rate": 0.0,
+              "cost": 0.0,
+              "n_checkpoints": 4
+            }
+          },
+          "F1-ridge": {
+            "7": {
+              "pass_rate": 0.009678819449618459,
+              "cost": 0.0,
+              "n_checkpoints": 1
+            },
+            "14": {
+              "pass_rate": 0.004947916662786156,
+              "cost": 0.0,
+              "n_checkpoints": 2
+            },
+            "21": {
+              "pass_rate": 0.0006365740809997078,
+              "cost": 0.0,
+              "n_checkpoints": 3
+            },
+            "28": {
+              "pass_rate": 0.000260416665696539,
+              "cost": 0.0,
+              "n_checkpoints": 4
+            }
+          },
+          "F2-mlp64": {
+            "7": {
+              "pass_rate": 0.0,
+              "cost": 0.0,
+              "n_checkpoints": 1
+            },
+            "14": {
+              "pass_rate": 0.0,
+              "cost": 0.0,
+              "n_checkpoints": 2
+            },
+            "21": {
+              "pass_rate": 0.0,
+              "cost": 0.0,
+              "n_checkpoints": 3
+            },
+            "28": {
+              "pass_rate": 0.0,
+              "cost": 0.0,
+              "n_checkpoints": 4
+            }
+          },
+          "F2-mlp512": {
+            "7": {
+              "pass_rate": 0.0,
+              "cost": 0.0,
+              "n_checkpoints": 1
+            },
+            "14": {
+              "pass_rate": 0.0,
+              "cost": 0.0,
+              "n_checkpoints": 2
+            },
+            "21": {
+              "pass_rate": 0.0,
+              "cost": 0.0,
+              "n_checkpoints": 3
+            },
+            "28": {
+              "pass_rate": 0.0,
+              "cost": 0.0,
+              "n_checkpoints": 4
+            }
+          },
+          "F3-shortcut": {
+            "7": {
+              "pass_rate": 1.0,
+              "cost": 0.25,
+              "n_checkpoints": 1
+            },
+            "14": {
+              "pass_rate": 0.0,
+              "cost": 0.25,
+              "n_checkpoints": 2
+            },
+            "21": {
+              "pass_rate": 0.0,
+              "cost": 0.25,
+              "n_checkpoints": 3
+            },
+            "28": {
+              "pass_rate": 0.0,
+              "cost": 0.25,
+              "n_checkpoints": 4
+            }
+          },
+          "F3-distill1b@7": {
+            "7": {
+              "pass_rate": 1.0,
+              "cost": 0.2857142857142857,
+              "n_checkpoints": 1
+            },
+            "14": {
+              "pass_rate": 0.0,
+              "cost": 0.2857142857142857,
+              "n_checkpoints": 2
+            },
+            "21": {
+              "pass_rate": 0.0,
+              "cost": 0.2857142857142857,
+              "n_checkpoints": 3
+            },
+            "28": {
+              "pass_rate": 0.0,
+              "cost": 0.2857142857142857,
+              "n_checkpoints": 4
+            }
+          },
+          "F3-distill3b@7": {
+            "7": {
+              "pass_rate": 1.0,
+              "cost": 0.35714285714285715,
+              "n_checkpoints": 1
+            },
+            "14": {
+              "pass_rate": 0.0,
+              "cost": 0.35714285714285715,
+              "n_checkpoints": 2
+            },
+            "21": {
+              "pass_rate": 0.0,
+              "cost": 0.35714285714285715,
+              "n_checkpoints": 3
+            },
+            "28": {
+              "pass_rate": 0.0,
+              "cost": 0.35714285714285715,
+              "n_checkpoints": 4
+            }
+          },
+          "F4-projaware": {
+            "7": {
+              "pass_rate": 0.0,
+              "cost": 0.0,
+              "n_checkpoints": 1
+            },
+            "14": {
+              "pass_rate": 0.0,
+              "cost": 0.0,
+              "n_checkpoints": 2
+            },
+            "21": {
+              "pass_rate": 0.0,
+              "cost": 0.0,
+              "n_checkpoints": 3
+            },
+            "28": {
+              "pass_rate": 0.0,
+              "cost": 0.0,
+              "n_checkpoints": 4
+            }
+          },
+          "F4-oracle": {
+            "7": {
+              "pass_rate": 0.0,
+              "cost": 0.25,
+              "n_checkpoints": 1
+            },
+            "14": {
+              "pass_rate": 0.0,
+              "cost": 0.25,
+              "n_checkpoints": 2
+            },
+            "21": {
+              "pass_rate": 0.0,
+              "cost": 0.25,
+              "n_checkpoints": 3
+            },
+            "28": {
+              "pass_rate": 0.0,
+              "cost": 0.25,
+              "n_checkpoints": 4
+            }
+          }
+        }
+      },
+      "diagnostic": {
+        "7": {
+          "floor": 0.09545937925577164,
+          "thr": 0.20117397606372833,
+          "F0-mean": 7.296627044677734,
+          "F0-copy": 0.46013373136520386,
+          "F1-ridge": 0.4030188322067261,
+          "F2-mlp64": 6.735671520233154,
+          "F2-mlp512": 5.148207187652588,
+          "F3-shortcut": 0.0,
+          "F3-distill1b@7": 0.0,
+          "F3-distill3b@7": 0.0,
+          "F4-projaware": 7.225955963134766,
+          "F4-oracle": 7.211204528808594
+        },
+        "14": {
+          "floor": 0.12259469926357269,
+          "thr": 0.3511691689491272,
+          "F0-mean": 7.484466552734375,
+          "F0-copy": 0.4926616847515106,
+          "F1-ridge": 0.5083261132240295,
+          "F2-mlp64": 7.024081230163574,
+          "F2-mlp512": 5.2619805335998535,
+          "F3-shortcut": 5.694220542907715,
+          "F3-distill1b@7": 6.540435791015625,
+          "F3-distill3b@7": 7.42538595199585,
+          "F4-projaware": 24.83797264099121,
+          "F4-oracle": 23.137765884399414
+        },
+        "21": {
+          "floor": 0.11679547280073166,
+          "thr": 0.2365790754556656,
+          "F0-mean": 7.87952184677124,
+          "F0-copy": 0.47181808948516846,
+          "F1-ridge": 0.4425334334373474,
+          "F2-mlp64": 7.26447868347168,
+          "F2-mlp512": 5.312300682067871,
+          "F3-shortcut": 6.389206886291504,
+          "F3-distill1b@7": 6.833013534545898,
+          "F3-distill3b@7": 7.667648792266846,
+          "F4-projaware": 144.37571716308594,
+          "F4-oracle": 114.98419952392578
+        },
+        "28": {
+          "floor": 0.13797599077224731,
+          "thr": 0.28152185678482056,
+          "F0-mean": 7.885640621185303,
+          "F0-copy": 0.7100057601928711,
+          "F1-ridge": 0.540973961353302,
+          "F2-mlp64": 7.440155029296875,
+          "F2-mlp512": 5.666023254394531,
+          "F3-shortcut": 6.998302936553955,
+          "F3-distill1b@7": 7.306805610656738,
+          "F3-distill3b@7": 7.911602020263672,
+          "F4-projaware": 17.23877716064453,
+          "F4-oracle": 16.156375885009766
+        }
+      }
+    }
+  }
+}
