@@ -96,33 +96,3 @@ itself above threshold past layer 7 — the deep activations are not a learnable
 function of cheap or shallow features at this scale, so more training data
 does not change the outcome.
 
-## Layout
-
-```
-difr_mid/                 library: JL fingerprints (fingerprint.py), vLLM
-                          activation tap (tap_vllm.py), activation collection
-                          (collect_activations.py), forger ladder (forgers.py)
-experiments/              run_demo.py, run_detection.py, run_forgery_sweep.py,
-                          make_figures.py, remote_*.sh GPU launchers,
-                          collect/analyze_entropy_divergence.py (Token-DiFR)
-results/                  output JSONs; figures in results/figures/
-docs/                     WRITEUP.md, forgery-attack-analysis.md, slide + math
-                          notes, DiFR paper PDF, EXPERIMENT_entropy_divergence.md
-token_difr/               Token-DiFR side track: repair_loop.py, sweep_threshold.py
-tools/                    GPU diagnostics (seed/fp8 checks, env capture),
-                          ssh config templates
-difr_org/                 upstream DiFR reference files (unmodified)
-```
-
-## Running
-
-```
-python experiments/run_demo.py            # toy validation, local CPU
-# GPU runs (workflow in CLAUDE.md):
-rsync -az --exclude .git --exclude results --exclude __pycache__ ./ gpu:difr-mid/
-ssh gpu "cd difr-mid && bash experiments/remote_run.sh 2>&1"          # Qwen3-1.7B detection
-ssh gpu "cd difr-mid && bash experiments/remote_detection_8b.sh 2>&1" # Llama-3.1-8B (needs HF token)
-ssh gpu "cd difr-mid && bash experiments/remote_forgery.sh 2>&1"      # forgery sweep
-rsync -az gpu:difr-mid/results/ ./results/
-python experiments/make_figures.py        # rebuild figures from results/*.json
-```
